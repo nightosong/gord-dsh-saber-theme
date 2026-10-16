@@ -3,10 +3,13 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
+export async function readVersion() {
+  return (await readFile(path.join(root, 'VERSION'), 'utf8')).trim();
+}
 export async function build() {
   const read = file => readFile(path.join(root, file), 'utf8');
   const pkg = JSON.parse(await read('package.json'));
-  const version = (await read('VERSION')).trim();
+  const version = await readVersion();
   if (pkg.version !== version || !/^\d+\.\d+\.\d+$/.test(version)) throw new Error('VERSION and package.json must contain the same release version');
   const tokens = JSON.parse(await read('theme/tokens.json'));
   for (const [key, value] of Object.entries(tokens)) {

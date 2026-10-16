@@ -103,7 +103,8 @@ export async function manage({ command, home = resolveHome(), profile = 'all' })
     const destination = path.join(home, 'themes', ID, `${version}-${randomUUID()}`);
     await mkdir(path.join(destination, 'lib'), { recursive: true });
     for (const file of ['index.js', 'client.js']) await copyFile(path.join(root, 'lib', file), path.join(destination, 'lib', file));
-    await writeFile(path.join(destination, 'package.json'), JSON.stringify({ name: pkg.name, version, type: 'module', exports: pkg.exports, dsh: pkg.dsh }, null, 2));
+    await copyFile(path.join(root, 'cordis.patch.yml'), path.join(destination, 'cordis.patch.yml'));
+    await writeFile(path.join(destination, 'package.json'), JSON.stringify({ name: pkg.name, version, type: 'module', exports: pkg.exports, dsh: pkg.dsh, engines: pkg.engines, peerDependencies: pkg.peerDependencies, peerDependenciesMeta: pkg.peerDependenciesMeta }, null, 2));
     moduleFile = path.join(destination, 'lib/index.js');
   }
   const result = [];

@@ -6,15 +6,19 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { chromium } from '@playwright/test';
 import { manage } from './manage.mjs';
+import { readVersion } from './build.mjs';
 
 const home = await mkdtemp(path.join(tmpdir(), 'saber-dsh-'));
 const env = { ...process.env, DSH_HOME: home };
 const command = process.env.DSH_BIN || 'dsh';
+const version = await readVersion();
 let child;
 let browser;
 try {
   execFileSync(command, ['web', '--dump-default-config'], { env, stdio: 'ignore' });
-  await manage({ command: 'install', home, profile: 'web' });
+  if (process.env.SABER_PACKAGE) {
+    execFileSync(command, ['plugin', '--profile', 'web', 'add', path.resolve(process.env.SABER_PACKAGE)], { env, stdio: 'pipe' });
+  } else await manage({ command: 'install', home, profile: 'web' });
   child = spawn(command, ['web', '--port', '0', '--no-open'], { env, stdio: ['ignore', 'pipe', 'pipe'] });
   const url = await new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error('DSH startup timed out')), 45000);
@@ -34,7 +38,7 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(url);
-  await page.locator('body[data-dsh-saber="0.1.0"]').waitFor({ timeout: 30000 });
+  await page.locator(`body[data-dsh-saber="${version}"]`).waitFor({ timeout: 30000 });
   await page.waitForTimeout(1200);
   const continueButton = page.getByText('Continue', { exact: true });
   if (await continueButton.isVisible()) {

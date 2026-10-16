@@ -2,6 +2,25 @@
 
 日期：2026-10-16。开发平台经 `uname` 确认为 macOS（Darwin），使用 zsh；本地 Node.js 24.14.0、DSH 0.2.0-rc.2。
 
+## 0.1.1 市场分发补充验证
+
+- `npm run check`：5 项基础测试和 4 项浏览器测试通过。
+- `npm run package`：产物 `gord-dsh-saber-theme.tgz` 为标准 npm 包格式，593,824 字节、7 个文件；仅包含两个运行文件、插件清单、原生 bundle 补丁及说明/许可，无安装期脚本、源码构建依赖或用户配置。
+- Web：通过真实 `dsh plugin --profile web add <本地 tgz>` 安装到临时 profile，随后启动 DSH `0.2.0-rc.2`；主题版本 `0.1.1`、背景和官方设置深色切换通过，页面错误为 0。
+- macOS Desktop：将同一个 tgz 安装到临时 profile 的包目录并按原生 bundle 加载；`dsh-app://app/` 中版本为 `0.1.1`，背景生效，主题样式仅一份，页面错误为 0。
+- `engines.dsh` 与宿主主题服务的可选 `peerDependencies` 都限定为实际验证的 `0.2.0-rc.2`；未扩大兼容性声明。
+- 截图声明位于根目录 `screenshots.json`，市场从公开 GitHub 仓库读取，无需把展示截图装进运行包。
+
+### 复现市场安装验证
+
+```bash
+npm run package
+SABER_PACKAGE=dist/gord-dsh-saber-theme.tgz node scripts/dsh-smoke.mjs
+SABER_PACKAGE=dist/gord-dsh-saber-theme.tgz node scripts/desktop-smoke.mjs
+```
+
+以下为 `0.1.0` 的原始验证记录；其界面样式沿用至 `0.1.1`。
+
 | 范围 | 验证方法 | 结果/边界 |
 | --- | --- | --- |
 | 版本一致性 | 校验 VERSION、package.json、锁文件、README、CHANGELOG、构建输出 | 本地通过 |

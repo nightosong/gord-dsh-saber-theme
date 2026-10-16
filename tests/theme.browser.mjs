@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { readVersion } from '../scripts/build.mjs';
+const version = await readVersion();
 
 test('light/dark palettes, responsive layout and interaction survive theming', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.locator('body')).toHaveAttribute('data-dsh-saber', '0.1.0');
+  await expect(page.locator('body')).toHaveAttribute('data-dsh-saber', version);
   const expectedImage = await page.evaluate(() => matchMedia('(prefers-reduced-transparency: reduce)').matches ? 'webp' : 'jpeg');
   await expect.poll(() => page.locator('.fixture_centerCol').evaluate((node, type) => getComputedStyle(node).backgroundImage.includes(`data:image/${type};base64`), expectedImage)).toBe(true);
   await expect(page.locator('body')).toHaveCSS('color', 'rgb(29, 43, 58)');
