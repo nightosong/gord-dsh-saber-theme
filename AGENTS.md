@@ -7,5 +7,6 @@
 - 同一份插件适配 macOS/Windows 和 Desktop/Web；保持恢复能力，不覆盖其他 DSH 配置。
 - 本地验证使用临时 `DSH_HOME`。用户未请求时，不安装到其真实配置、不重启正在运行的 DSH。
 - 修改后运行 `npm run check`；涉及 DSH 接口或布局时，额外运行 `node scripts/dsh-smoke.mjs`。
+- 桌面相关改动还需 `node scripts/desktop-smoke.mjs`；该脚本使用独立用户目录和端口，不要改成对用户当前实例进行测试。
 - 不将 `node_modules`、`lib`、`dist`、凭据、个人 DSH 配置或临时截图提交。
 - 美术素材来源写入 `NOTICE.md`；不得将第三方角色美术声明为 MIT 授权。

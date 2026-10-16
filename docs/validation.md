@@ -7,11 +7,12 @@
 | 版本一致性 | 校验 VERSION、package.json、锁文件、README、CHANGELOG、构建输出 | 本地通过 |
 | 配置安装/恢复 | 临时目录测试，覆盖空配置、`[]`、注释、CRLF、无末尾换行、中文和空格路径、重复安装、后续追加设置 | 本地通过；损坏的配置块停止处理 |
 | macOS 入口 | 直接执行真实 `.command` 脚本，对隔离配置完成安装与恢复 | 本地通过 |
-| Windows 入口 | GitHub Actions 在 Windows 上执行真实 `.cmd` 安装与恢复脚本 | 以对应提交的 Actions 结果为准 |
+| Windows 入口 | GitHub Actions 在 Windows 上执行真实 `.cmd` 安装与恢复脚本 | 已通过，详见仓库 Actions |
 | 主题功能 | Chromium 测试浅色/深色、窄窗口、输入操作、首页/会话背景、失败回滚 | 本地通过 |
 | 卸载清理 | 100 次加载/卸载，检查样式数量、主题标记、令牌恢复与草稿保留 | 本地通过，无轮播计时器/观察器 |
 | 真实 DSH Web | 临时 DSH_HOME 启动真实 DSH，验证原生插件、实际布局、图片解码、通过官方 Settings 切换深色、页面错误并截图 | 本地通过，不调用模型；实际截图位于 `docs/images/` |
-| 原生桌面视觉 | 沿用 DSH 共同的客户端插件接口与布局 | macOS/Windows 桌面应用的窗口、缩放和多屏效果仍需真机验收 |
+| macOS 原生桌面 | 使用已安装的应用二进制、临时 DSH_HOME、独立 Electron userData、端口 0 启动，检查 `dsh-app://app/` 中主题标记、背景与样式数量并截图 | 本地通过，渲染脚本错误为 0；截图位于 `docs/images/dsh-saber-desktop-macos.png` |
+| Windows 原生桌面视觉 | 沿用 DSH 共同的客户端插件接口与布局 | 仍需 Windows 桌面真机验收；两平台缩放/多屏/长会话压力不属于本次验收 |
 
 ## 复现
 
@@ -20,11 +21,14 @@ npm ci
 npx playwright install chromium
 npm run check
 node scripts/dsh-smoke.mjs
+node scripts/desktop-smoke.mjs
 node scripts/release.mjs macos
 node scripts/release.mjs windows
 ```
 
 真实 DSH 集成测试需要已安装的 `dsh` 命令（当前脚本用于 macOS/Linux 开发机）。它会在临时目录初始化自己的 profile 和凭据，不读取用户真实账号配置；启动口令仅在测试进程内使用，不保存到截图或报告。截图输出为 `test-results/dsh-smoke.png`。
+
+桌面测试需要安装 DeepSeek Harness。`desktop-smoke.mjs` 默认定位 macOS 应用；其他路径可用 `SABER_DESKTOP_APP` 指定。测试使用独立用户目录并将临时 profile 的 `webserver.port` 设为 `0`，避免与已运行的桌面应用默认端口冲突。测试过程不修改安装的应用文件。
 
 ## 兼容性与限制
 

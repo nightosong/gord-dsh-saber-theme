@@ -1,0 +1,84 @@
+// Launch a second, isolated copy of the installed Desktop binary. Both DSH
+// data and Electron userData are temporary. Never quit the user's existing app.
+import { _electron } from '@playwright/test';
+import { mkdtemp, rm, mkdir, writeFile, realpath } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { manage } from './manage.mjs';
+
+const executablePath = process.env.SABER_DESKTOP_APP || (process.platform === 'darwin'
+  ? '/Applications/DeepSeek Harness.app/Contents/MacOS/DeepSeek Harness' : undefined);
+if (!executablePath) throw new Error('Set SABER_DESKTOP_APP to the installed DeepSeek Harness executable');
+const temporary = await mkdtemp(path.join(tmpdir(), 'saber-desktop-'));
+const home = path.join(temporary, 'dsh');
+const userData = path.join(temporary, 'chromium');
+const env = { ...process.env, DSH_HOME: home };
+delete env.ELECTRON_RUN_AS_NODE;
+let application;
+let desktopLog = '';
+async function stop() {
+  if (!application) return;
+  const child = application.process();
+  // Closing during the installed app's first profile startup can leave its
+  // quit coordinator waiting. Only this isolated test process may be killed.
+  await Promise.race([application.close().catch(() => {}), new Promise(resolve => setTimeout(resolve, 5000).unref())]);
+  if (child.exitCode === null) {
+    child.kill('SIGTERM');
+    await Promise.race([new Promise(resolve => child.once('exit', resolve)), new Promise(resolve => setTimeout(resolve, 3000).unref())]);
+    if (child.exitCode === null) child.kill('SIGKILL');
+  }
+  application = undefined;
+}
+async function launch() {
+  application = await _electron.launch({ executablePath, args: [`--user-data-dir=${userData}`], env, timeout: 20000 });
+  for (const stream of [application.process().stdout, application.process().stderr]) stream?.on('data', chunk => { desktopLog = (desktopLog + chunk.toString()).slice(-8000); });
+  const actual = await application.evaluate(({ app }) => app.getPath('userData'));
+  if (await realpath(actual) !== await realpath(userData)) throw new Error('Desktop userData isolation failed');
+  return application.firstWindow();
+}
+try {
+  // Same two bundle entries as the installed Desktop's generated profile.
+  // Its default backend port is fixed; port 0 prevents collisions with the
+  // user's existing Desktop while leaving that application's settings alone.
+  const profile = path.join(home, 'profiles/desktop');
+  await mkdir(profile, { recursive: true });
+  await writeFile(path.join(profile, 'package.json'), JSON.stringify({
+    name: 'dsh-profile-desktop', private: true, dependencies: {},
+    dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app'] } }
+  }));
+  await writeFile(path.join(profile, 'cordis.patch.yml'), '- id: webserver\n  config:\n    host: 127.0.0.1\n    port: 0\n');
+  console.log('Installing theme in isolated Desktop profile…');
+  await manage({ command: 'install', home, profile: 'desktop' });
+  const page = await launch();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.locator('body[data-dsh-saber="0.1.0"]').waitFor({ timeout: 45000 });
+  await page.waitForTimeout(1200);
+  for (const text of ['Continue', 'Configure later']) {
+    const button = page.getByText(text, { exact: true });
+    if (await button.isVisible()) { await button.click(); await page.waitForTimeout(300); }
+  }
+  const info = await page.evaluate(() => ({
+    url: location.href, theme: document.body.dataset.dshSaber,
+    platform: document.documentElement.dataset.platform,
+    hero: Boolean(document.querySelector('[class*="_composerHero"]')),
+    background: getComputedStyle(document.querySelector('[class*="_centerCol"]')).backgroundImage.includes('data:image/'),
+    styleCount: document.querySelectorAll('style[data-plugin="gord-dsh-saber-theme"]').length
+  }));
+  if (!info.background || info.styleCount !== 1) throw new Error('Native Desktop theme did not apply correctly');
+  const screenshot = process.env.SABER_DESKTOP_SCREENSHOT || 'test-results/desktop-smoke.png';
+  await mkdir(path.dirname(screenshot), { recursive: true });
+  await page.screenshot({ path: screenshot });
+  console.log(JSON.stringify({ ...info, errors, screenshot }, null, 2));
+  if (errors.length) throw new Error('Desktop renderer reported errors');
+} catch (error) {
+  if (application) {
+    for (const page of application.windows()) console.error({ url: page.url(), text: (await page.locator('body').innerText().catch(() => '')).slice(0, 2000) });
+    await application.windows()[0]?.screenshot({ path: '/tmp/gord-dsh-desktop-failure.png' }).catch(() => {});
+  }
+  console.error(desktopLog);
+  throw error;
+} finally {
+  await stop();
+  await rm(temporary, { recursive: true, force: true });
+}

@@ -4,11 +4,17 @@ DeepSeek Harness 的 Saber 主题，参考 [Codex Saber Theme](https://github.co
 
 **当前版本：0.1.0** · [发布版本](https://github.com/nightosong/gord-dsh-saber-theme/releases/tag/v0.1.0)
 
-使用 DSH 原生客户端插件，支持 **macOS / Windows** 和 **Desktop / `dsh web`**，保留官方浅色/深色切换、字号设置、会话与窗口操作。终端 TUI 不在本主题范围内。
+使用 DSH 原生客户端插件，支持 **macOS / Windows**，以 **Desktop 桌面版为主，兼容 `dsh web`**，保留官方浅色/深色切换、字号设置、会话与窗口操作。终端 TUI 不在本主题范围内。
 
 ## 预览
 
-以下为隔离 DSH `0.2.0-rc.2` Web 实例的实际截图。
+以下为隔离 DSH `0.2.0-rc.2` 实例的实际截图。
+
+macOS 原生桌面版：
+
+![Saber macOS 桌面主题](docs/images/dsh-saber-desktop-macos.png)
+
+Web 浅色与深色：
 
 ![Saber 浅色主题](docs/images/dsh-saber-light.png)
 
@@ -64,9 +70,10 @@ npm run preview
 
 ```bash
 node scripts/dsh-smoke.mjs
+node scripts/desktop-smoke.mjs
 ```
 
-它使用临时 DSH 数据目录启动真实 Web 界面，确认原生插件加载并截图，不调用模型。测试范围与平台验收记录见 [验证说明](docs/validation.md)。Windows 的原生桌面应用视觉效果仍需真机验收；自动测试不等同于桌面应用验收。
+前者使用临时 DSH 数据目录启动真实 Web 界面；后者使用独立的 DSH 目录、Electron 用户目录和空闲后端端口启动已安装的桌面应用。两者均检查原生插件并截图，不调用模型。桌面测试默认定位 macOS 应用，也可用 `SABER_DESKTOP_APP` 指定可执行文件。测试范围与平台验收记录见 [验证说明](docs/validation.md)。Windows 的原生桌面应用视觉效果仍需真机验收。
 
 ## 版本与发布
 
