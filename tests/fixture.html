@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saber theme component fixture</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:14px/1.6 system-ui;color:var(--dsw-alias-label-primary)}button,textarea{font:inherit;color:inherit}button{cursor:pointer;border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:8px 14px;background:var(--dsw-specific-menu)}button:focus-visible,textarea:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary);outline-offset:3px}.fixture_frame{height:100dvh;display:grid;grid-template-columns:248px 1fr}.fixture_sidebarCol{padding:32px 18px;display:flex;flex-direction:column;gap:16px}.fixture_centerCol{display:flex;align-items:center;justify-content:center;min-width:0}.fixture_welcomeBrand{text-align:center;font:300 38px/1.3 Georgia,serif;letter-spacing:-.03em;margin-bottom:36px}.work{width:min(640px,85%)}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--dsw-alias-label-secondary)}.nav{display:grid;gap:8px;margin-top:32px}.nav button{text-align:left;background:transparent;border:0}.nav button:hover{background:var(--dsw-alias-interactive-bg-hover)}.fixture_composer{padding:18px;border:1px solid var(--dsw-alias-border-l1);border-radius:22px;background:var(--dsw-specific-menu);box-shadow:0 10px 35px #3675a318}textarea{resize:vertical;width:100%;min-height:96px;border:0;background:transparent}.actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.note{position:fixed;bottom:12px;right:18px;font-size:10px;color:var(--dsw-alias-label-secondary)}#dark{margin-top:auto}@media(max-width:760px){.fixture_frame{grid-template-columns:64px 1fr}.fixture_sidebarCol{padding:18px 8px}.brand,.eyebrow,.nav{display:none}#dark{padding:6px;font-size:10px}}
+</style>
+</head><body>
+<div class="fixture_frame"><aside class="fixture_sidebarCol"><strong class="brand">DeepSeek Harness</strong><span class="eyebrow">SABER · ICE ATELIER</span><button id="new">＋</button><nav class="nav"><button>项目与会话</button><button>文件</button><button>设置</button></nav><button id="dark">浅色 / 深色</button></aside><main class="fixture_centerCol"><section class="work fixture_composerHero"><div class="fixture_welcomeBrand">Make something wonderful.</div><div class="fixture_composer"><textarea aria-label="消息" placeholder="从一个想法开始…"></textarea><div class="actions"><span class="eyebrow">DEEPSEEK HARNESS</span><button id="send">发送 ↑</button></div></div><p id="message"></p></section></main></div><span class="note">COMPONENT FIXTURE · 非 DSH 实机截图</span>
+<script>
+window.saberModule = null;
+window.__ModuleLoader__ = {load(row) {window.saberModule = row.factory();}};
+window.baseStyle = document.body.getAttribute('style');
+window.ctx = {
+  theme: {overrideTokens(source,tokens) {
+    const previous = document.body.getAttribute('style');
+    const update = () => {for(const [key, modes] of Object.entries(tokens)) document.body.style.setProperty(key, modes[document.body.hasAttribute('data-ds-dark-theme')?'dark':'light']);};
+    update();
+    document.addEventListener('fixture-theme', update);
+    return () => {document.removeEventListener('fixture-theme', update); if(previous===null) document.body.removeAttribute('style');else document.body.setAttribute('style',previous);};
+  }},
+  effect(factory) {window.disposeSaber = factory();}
+};
+document.querySelector('#dark').onclick=()=>{document.body.toggleAttribute('data-ds-dark-theme');document.dispatchEvent(new Event('fixture-theme'));};
+document.querySelector('#send').onclick=()=>{document.querySelector('#message').textContent=document.querySelector('textarea').value;};
+</script><script src="/client.js"></script><script>window.saberModule.apply(window.ctx);</script>
+</body></html>
