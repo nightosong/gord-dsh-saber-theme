@@ -5,7 +5,8 @@ test('light/dark palettes, responsive layout and interaction survive theming', a
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   await expect(page.locator('body')).toHaveAttribute('data-dsh-saber', '0.1.0');
-  expect(await page.locator('.fixture_centerCol').evaluate(node => getComputedStyle(node).backgroundImage.includes('data:image/jpeg;base64'))).toBe(true);
+  const expectedImage = await page.evaluate(() => matchMedia('(prefers-reduced-transparency: reduce)').matches ? 'webp' : 'jpeg');
+  await expect.poll(() => page.locator('.fixture_centerCol').evaluate((node, type) => getComputedStyle(node).backgroundImage.includes(`data:image/${type};base64`), expectedImage)).toBe(true);
   await expect(page.locator('body')).toHaveCSS('color', 'rgb(29, 43, 58)');
   await page.getByRole('textbox').fill('Saber test');
   await page.locator('#send').click();
@@ -16,6 +17,16 @@ test('light/dark palettes, responsive layout and interaction survive theming', a
   await expect(page.locator('.fixture_centerCol')).toHaveCSS('background-image', /data:image\/webp;base64/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test('reduced transparency selects a stronger veil and the compact background', async ({ page }) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'no-preference' }] });
+  await page.goto('/');
+  await expect.poll(() => page.locator('.fixture_centerCol').evaluate(node => getComputedStyle(node).backgroundImage.includes('data:image/jpeg;base64'))).toBe(true);
+  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }] });
+  await expect.poll(() => page.locator('.fixture_centerCol').evaluate(node => getComputedStyle(node).backgroundImage.includes('data:image/webp;base64'))).toBe(true);
+  await cdp.detach();
 });
 
 test('unload/reload leaves one style, removes all owned state and preserves input', async ({ page }) => {
