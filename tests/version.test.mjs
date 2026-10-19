@@ -5,8 +5,9 @@ import { build, root } from '../scripts/build.mjs';
 import path from 'node:path';
 
 test('release version agrees across metadata, docs and generated bundle', async () => {
-  const { version, bytes } = await build();
-  assert.ok(bytes < 4 * 1024 * 1024, 'Native theme bundle must remain under 4 MiB');
+  const { version, bytes, wallpapers } = await build();
+  assert.equal(wallpapers, 30);
+  assert.ok(bytes < 1024 * 1024, 'Lazy wallpaper resources must not inflate the startup bundle above 1 MiB');
   const pkg = JSON.parse(await readFile(path.join(root, 'package.json')));
   assert.equal(version, pkg.version);
   const lock = JSON.parse(await readFile(path.join(root, 'package-lock.json')));
@@ -15,7 +16,7 @@ test('release version agrees across metadata, docs and generated bundle', async 
   for (const file of ['CHANGELOG.md', 'README.md']) assert.ok((await readFile(path.join(root, file), 'utf8')).includes(version), `${file} must mention ${version}`);
   assert.equal(pkg.dsh.client.platform, 'web');
   assert.equal(pkg.dsh.bundle.patch, './cordis.patch.yml');
-  assert.equal(pkg.engines.dsh, '0.2.0-rc.2');
+  assert.equal(pkg.engines.dsh, '0.2.0-rc.2 || 0.2.1-rc.2');
   assert.equal(pkg.peerDependencies['@deepseek-ai/dsh-client-ui-theme'], pkg.engines.dsh);
   assert.equal(pkg.peerDependenciesMeta['@deepseek-ai/dsh-client-ui-theme'].optional, true);
   const patch = await readFile(path.join(root, 'cordis.patch.yml'), 'utf8');

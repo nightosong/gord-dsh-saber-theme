@@ -7,7 +7,20 @@
 <div class="fixture_frame"><aside class="fixture_sidebarCol"><strong class="brand">DeepSeek Harness</strong><span class="eyebrow">SABER · ICE ATELIER</span><button id="new">＋</button><nav class="nav"><button>项目与会话</button><button>文件</button><button>设置</button></nav><button id="dark">浅色 / 深色</button></aside><main class="fixture_centerCol"><section class="work fixture_composerHero"><div class="fixture_welcomeBrand">Make something wonderful.</div><div class="fixture_composer"><textarea aria-label="消息" placeholder="从一个想法开始…"></textarea><div class="actions"><span class="eyebrow">DEEPSEEK HARNESS</span><button id="send">发送 ↑</button></div></div><p id="message"></p></section></main></div><span class="note">COMPONENT FIXTURE · 非 DSH 实机截图</span>
 <script>
 window.saberModule = null;
-window.__ModuleLoader__ = {load(row) {window.saberModule = row.factory();}};
+window.wallpaperChunks = new Map();
+window.fixtureRequire = {async: async spec => {
+  const file = spec.slice(2);
+  if (!window.wallpaperChunks.has(file)) await new Promise((resolve,reject) => {
+    const script=document.createElement('script');script.src='/'+file;
+    script.onload=()=>{script.remove();resolve();};script.onerror=()=>{script.remove();reject(new Error('Chunk load failed'));};
+    document.head.append(script);
+  });
+  return window.wallpaperChunks.get(file);
+}};
+window.__ModuleLoader__ = {load(row) {
+  if(row.chunk) window.wallpaperChunks.set(row.chunk,row.factory());
+  else window.saberModule=row.factory(window.fixtureRequire);
+}};
 window.baseStyle = document.body.getAttribute('style');
 window.ctx = {
   theme: {overrideTokens(source,tokens) {

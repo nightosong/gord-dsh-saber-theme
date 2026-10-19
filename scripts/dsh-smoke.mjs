@@ -7,6 +7,7 @@ import path from 'node:path';
 import { chromium } from '@playwright/test';
 import { manage } from './manage.mjs';
 import { readVersion } from './build.mjs';
+import { rotationSmoke } from './rotation-smoke.mjs';
 
 const home = await mkdtemp(path.join(tmpdir(), 'saber-dsh-'));
 const env = { ...process.env, DSH_HOME: home };
@@ -77,7 +78,8 @@ try {
   await page.keyboard.press('Escape');
   const darkScreenshot = screenshot.replace(/\.png$/, '-dark.png');
   await page.screenshot({ path: darkScreenshot });
-  console.log(JSON.stringify({ ...info, nativeDarkMode: true, errors, screenshot, darkScreenshot }, null, 2));
+  const rotation = await rotationSmoke(page, version);
+  console.log(JSON.stringify({ ...info, nativeDarkMode: true, rotation, errors, screenshot, darkScreenshot }, null, 2));
   if (errors.length) throw new Error('DSH browser reported runtime errors');
 } finally {
   await browser?.close();

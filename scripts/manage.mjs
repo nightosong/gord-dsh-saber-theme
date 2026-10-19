@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { copyFile, mkdir, readFile, writeFile, rename, unlink, open } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile, rename, unlink, open, readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -102,7 +102,9 @@ export async function manage({ command, home = resolveHome(), profile = 'all' })
     // client bundle being observed by DSH's live configuration watcher.
     const destination = path.join(home, 'themes', ID, `${version}-${randomUUID()}`);
     await mkdir(path.join(destination, 'lib'), { recursive: true });
-    for (const file of ['index.js', 'client.js']) await copyFile(path.join(root, 'lib', file), path.join(destination, 'lib', file));
+    for (const file of await readdir(path.join(root, 'lib'))) {
+      if (file === 'index.js' || file === 'client.js' || /^client\.wallpaper-\d+\.js$/.test(file)) await copyFile(path.join(root, 'lib', file), path.join(destination, 'lib', file));
+    }
     await copyFile(path.join(root, 'cordis.patch.yml'), path.join(destination, 'cordis.patch.yml'));
     await writeFile(path.join(destination, 'package.json'), JSON.stringify({ name: pkg.name, version, type: 'module', exports: pkg.exports, dsh: pkg.dsh, engines: pkg.engines, peerDependencies: pkg.peerDependencies, peerDependenciesMeta: pkg.peerDependenciesMeta }, null, 2));
     moduleFile = path.join(destination, 'lib/index.js');

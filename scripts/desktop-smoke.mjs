@@ -8,6 +8,7 @@ import { manage } from './manage.mjs';
 import { execFileSync } from 'node:child_process';
 import { readVersion } from './build.mjs';
 import { verifyPackage } from './verify-package.mjs';
+import { rotationSmoke } from './rotation-smoke.mjs';
 
 const executablePath = process.env.SABER_DESKTOP_APP || (process.platform === 'darwin'
   ? '/Applications/DeepSeek Harness.app/Contents/MacOS/DeepSeek Harness' : undefined);
@@ -38,7 +39,15 @@ async function launch() {
   for (const stream of [application.process().stdout, application.process().stderr]) stream?.on('data', chunk => { desktopLog = (desktopLog + chunk.toString()).slice(-8000); });
   const actual = await application.evaluate(({ app }) => app.getPath('userData'));
   if (await realpath(actual) !== await realpath(userData)) throw new Error('Desktop userData isolation failed');
-  return application.firstWindow();
+  // Newer Desktop builds briefly create a bootstrap/welcome window before the
+  // product window. Do not attach the smoke test to that disposable window.
+  const deadline = Date.now() + 45000;
+  while (Date.now() < deadline) {
+    const product = application.windows().find(page => !page.isClosed() && page.url().startsWith('dsh-app://app/'));
+    if (product) return product;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  throw new Error('Desktop product window did not open');
 }
 try {
   // Same two bundle entries as the installed Desktop's generated profile.
@@ -80,18 +89,20 @@ try {
     background: getComputedStyle(document.querySelector('[class*="_centerCol"]')).backgroundImage.includes('data:image/'),
     styleCount: document.querySelectorAll('style[data-plugin="gord-dsh-saber-theme"]').length
   }));
+  info.desktopVersion = await application.evaluate(({ app }) => app.getVersion());
   if (!info.background || info.styleCount !== 1) throw new Error('Native Desktop theme did not apply correctly');
   const screenshot = process.env.SABER_DESKTOP_SCREENSHOT || 'test-results/desktop-smoke.png';
   await mkdir(path.dirname(screenshot), { recursive: true });
   await page.screenshot({ path: screenshot });
-  console.log(JSON.stringify({ ...info, errors, screenshot }, null, 2));
+  const rotation = await rotationSmoke(page, version);
+  console.log(JSON.stringify({ ...info, rotation, errors, screenshot }, null, 2));
   if (errors.length) throw new Error('Desktop renderer reported errors');
 } catch (error) {
   if (application) {
-    for (const page of application.windows()) console.error({ url: page.url(), text: (await page.locator('body').innerText().catch(() => '')).slice(0, 2000) });
+    for (const page of application.windows()) console.error({ url: page.url(), errors: (await page.pageErrors().catch(() => [])).map(error => error.message), text: (await page.locator('body').innerText().catch(() => '')).slice(0, 2000) });
     await application.windows()[0]?.screenshot({ path: '/tmp/gord-dsh-desktop-failure.png' }).catch(() => {});
   }
-  console.error(desktopLog);
+  console.error(desktopLog.replace(/\?token=[\w-]+/g, '?token=[redacted]'));
   throw error;
 } finally {
   await stop();

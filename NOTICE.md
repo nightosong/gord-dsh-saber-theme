@@ -11,6 +11,7 @@
 | 本项目文件 | 参考项目来源 |
 | --- | --- |
 | `theme/assets/saber-standing.webp` | `macos/presets/preset-saber-ice-atelier/bg00-standing.webp` |
+| `theme/assets/rotation/bg01-*.webp` 至 `bg29-*.webp` | 同一目录 `macos/presets/preset-saber-ice-atelier/` 中同名文件，共 29 张聊天轮播背景 |
 | `theme/assets/saber-home.jpg` | `macos/presets/preset-saber-ice-atelier/home-background.png`，以 JPEG 85% 编码优化传输体积 |
 
 以上图片复用用户指定的同级参考项目，未改变画面内容。Saber 等角色形象、相关商标与图片不在 MIT 软件许可授权范围内；保留参考项目对美术素材的权利说明。原项目未声明这些素材已获得商业使用或无限制再分发授权。

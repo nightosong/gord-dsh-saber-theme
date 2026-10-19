@@ -42,6 +42,7 @@ test('isolated profile install/update/uninstall preserves user settings and make
     const moduleURL = JSON.parse(/name: (.*)/.exec(text)[1]);
     const moduleFile = fileURLToPath(moduleURL);
     assert.match(await readFile(moduleFile, 'utf8'), /export function apply/);
+    for (let i = 0; i < 30; i++) assert.ok((await readFile(path.join(path.dirname(moduleFile), `client.wallpaper-${i}.js`), 'utf8')).includes(`chunk:"client.wallpaper-${i}.js"`), 'Manual installer must copy every lazy wallpaper chunk');
     const [status] = await manage({ command: 'status', home });
     assert.equal(status.installed, true);
     await manage({ command: 'install', home });

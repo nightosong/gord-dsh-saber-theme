@@ -16,7 +16,7 @@ body[data-dsh-saber][data-ds-dark-theme] {
 body[data-dsh-saber] [class*="_frame"] > [class*="_centerCol"] {
   position: relative;
   background-color: var(--saber-canvas);
-  background-image: linear-gradient(90deg, var(--saber-veil) 12%, var(--saber-veil) 45%, var(--saber-edge)), var(--saber-standing);
+  background-image: linear-gradient(90deg, var(--saber-veil) 12%, var(--saber-veil) 45%, var(--saber-edge)), var(--saber-chat, var(--saber-standing));
   background-size: cover, auto 100%;
   background-position: center, right bottom;
   background-repeat: no-repeat;
@@ -40,9 +40,12 @@ body[data-dsh-saber] ::selection { background: #66a8dc55; }
 @media (max-width: 760px), (prefers-reduced-transparency: reduce) {
   body[data-dsh-saber] [class*="_frame"] > [class*="_centerCol"],
   body[data-dsh-saber] [class*="_frame"] > [class*="_centerCol"]:has([class*="_composerHero"]) {
-    background-image: linear-gradient(var(--saber-veil), var(--saber-veil)), var(--saber-standing);
+    background-image: linear-gradient(var(--saber-veil), var(--saber-veil)), var(--saber-chat, var(--saber-standing));
     background-size: cover, auto 100%;
     background-position: center, right bottom;
+  }
+  body[data-dsh-saber] [class*="_frame"] > [class*="_centerCol"]:has([class*="_composerHero"]) {
+    background-image: linear-gradient(var(--saber-veil), var(--saber-veil)), var(--saber-standing);
   }
 }
 @media print {
