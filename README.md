@@ -2,7 +2,7 @@
 
 DeepSeek Harness 的 Saber 主题，参考 [Codex Saber Theme](https://github.com/nightosong/codex-saber-theme) 的 **Saber Ice Atelier** 风格：冰蓝、通透面板与 Saber 主视觉。
 
-**当前版本：0.3.0** · [发布版本](https://github.com/nightosong/gord-dsh-saber-theme/releases/tag/v0.3.0)
+**当前版本：0.3.1** · [发布版本](https://github.com/nightosong/gord-dsh-saber-theme/releases/tag/v0.3.1)
 
 使用 DSH 原生客户端插件，支持 **macOS / Windows**，以 **Desktop 桌面版为主，兼容 `dsh web`**，保留官方浅色/深色切换、字号设置、会话与窗口操作。终端 TUI 不在本主题范围内。
 
@@ -40,7 +40,7 @@ Web 浅色与深色：
 也可先下载 Release 中的 `gord-dsh-saber-theme.tgz`，由插件管理器导入。Web CLI 可直接安装预构建包：
 
 ```bash
-dsh plugin --profile web add "https://github.com/nightosong/gord-dsh-saber-theme/releases/download/v0.3.0/gord-dsh-saber-theme.tgz"
+dsh plugin --profile web add "https://github.com/nightosong/gord-dsh-saber-theme/releases/download/v0.3.1/gord-dsh-saber-theme.tgz"
 ```
 
 这是标准 npm 包格式的 GitHub 发布资产，**不需要发布到 npm，也不需要在用户机器上构建**。市场安装与以下手动安装方式二选一。

@@ -80,7 +80,10 @@ test('existing worktree task tray takes precedence without losing the theme remi
 });
 
 test('hover closes after 200ms, navigation timeout keeps the reminder, and hidden windows close details', async ({ page }) => {
-  await page.clock.install();
+  // Keep the clock paused between assertions too: on slower Windows runners,
+  // wall time between runFor(199) and the assertion can cross the 200ms edge.
+  await page.clock.install({ time: new Date('2026-10-19T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-10-19T00:01:00Z'));
   await mount(page);
   await trigger(page).click();
   await expect(panel(page)).toBeVisible();

@@ -1,6 +1,6 @@
 {
   "name": "gord-dsh-saber-theme",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Saber Ice Atelier theme for DeepSeek Harness Desktop and Web",
   "private": true,
   "type": "module",
