@@ -2,7 +2,7 @@
 
 DeepSeek Harness 的 Saber 主题，参考 [Codex Saber Theme](https://github.com/nightosong/codex-saber-theme) 的 **Saber Ice Atelier** 风格：冰蓝、通透面板与 Saber 主视觉。
 
-**当前版本：0.2.0** · [发布版本](https://github.com/nightosong/gord-dsh-saber-theme/releases/tag/v0.2.0)
+**当前版本：0.3.0** · [发布版本](https://github.com/nightosong/gord-dsh-saber-theme/releases/tag/v0.3.0)
 
 使用 DSH 原生客户端插件，支持 **macOS / Windows**，以 **Desktop 桌面版为主，兼容 `dsh web`**，保留官方浅色/深色切换、字号设置、会话与窗口操作。终端 TUI 不在本主题范围内。
 
@@ -40,7 +40,7 @@ Web 浅色与深色：
 也可先下载 Release 中的 `gord-dsh-saber-theme.tgz`，由插件管理器导入。Web CLI 可直接安装预构建包：
 
 ```bash
-dsh plugin --profile web add "https://github.com/nightosong/gord-dsh-saber-theme/releases/download/v0.2.0/gord-dsh-saber-theme.tgz"
+dsh plugin --profile web add "https://github.com/nightosong/gord-dsh-saber-theme/releases/download/v0.3.0/gord-dsh-saber-theme.tgz"
 ```
 
 这是标准 npm 包格式的 GitHub 发布资产，**不需要发布到 npm，也不需要在用户机器上构建**。市场安装与以下手动安装方式二选一。
@@ -79,6 +79,18 @@ node scripts/manage.mjs uninstall
 | 备份 | 配置文件旁的 `*.saber-backup-*` | 同左 |
 
 恢复仅移除本主题配置块，保留其他设置；主题副本与备份保留供回退，可在关闭 DSH 且恢复后手动清理。本主题通过原生插件加载，无需调试端口。
+
+## 聊天右侧任务关注
+
+参考 [gord-dsh-worktree](https://github.com/nightosong/gord-dsh-worktree) 的任务关注设计，入口位于聊天右侧轮次索引下方。主数字为任务总数，角标为待处理与已结束未查看的数量；无任务时自动隐藏。
+
+- 鼠标移入展开，移出 200ms 后收起；也可点击或用键盘操作，Escape 收起。
+- 展示运行中、等待输入/审批、已结束未查看的其他会话；“已结束”不代表执行成功。
+- 点击打开已有会话，确认切换成功后才移除本轮提醒；新的运行或请求可以再次出现。
+- 支持拖动并记住当前设备上的位置，↺ 恢复到索引下方；窄窗口自动限制位置并避开输入区。
+- 跟随浅色/深色与中英文；同时启用 `gord-dsh-worktree` 且其任务入口可见时，主题入口自动隐藏。
+
+直接订阅 DSH 的会话摘要和统一状态，不轮询、不读取聊天正文、不保持额外会话引用；收起时不渲染列表，展开每页最多 20 条。缺少宿主状态接口时隐藏任务入口，主题及轮播继续工作。提醒属于当前窗口，不提供独立的跨窗口通知记录。
 
 ## 开发与验证
 

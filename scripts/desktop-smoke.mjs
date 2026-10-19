@@ -77,6 +77,7 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.locator(`body[data-dsh-saber="${version}"]`).waitFor({ timeout: 45000 });
+  await page.locator('[data-saber-task-host][data-saber-task-state="ready"]').waitFor({ state: 'attached', timeout: 10000 });
   await page.waitForTimeout(1200);
   for (const text of ['Continue', 'Configure later']) {
     const button = page.getByText(text, { exact: true });
@@ -84,6 +85,7 @@ try {
   }
   const info = await page.evaluate(() => ({
     url: location.href, theme: document.body.dataset.dshSaber,
+    taskTrayReady: Boolean(document.querySelector('[data-saber-task-host]')),
     platform: document.documentElement.dataset.platform,
     hero: Boolean(document.querySelector('[class*="_composerHero"]')),
     background: getComputedStyle(document.querySelector('[class*="_centerCol"]')).backgroundImage.includes('data:image/'),

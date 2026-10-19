@@ -40,6 +40,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(url);
   await page.locator(`body[data-dsh-saber="${version}"]`).waitFor({ timeout: 30000 });
+  await page.locator('[data-saber-task-host][data-saber-task-state="ready"]').waitFor({ state: 'attached', timeout: 10000 });
   await page.waitForTimeout(1200);
   const continueButton = page.getByText('Continue', { exact: true });
   if (await continueButton.isVisible()) {
@@ -62,6 +63,7 @@ try {
   const info = await page.evaluate(() => ({
     title: document.title,
     themed: document.body.dataset.dshSaber,
+    taskTrayReady: Boolean(document.querySelector('[data-saber-task-host]')),
     center: [...document.querySelectorAll('[class*="_centerCol"]')].map(node => ({ class: node.className, background: getComputedStyle(node).backgroundImage.slice(0, 180) })),
     classes: [...document.querySelectorAll('[class]')].map(node => node.className).filter(name => typeof name === 'string' && /welcome|empty|brand|composer/i.test(name)),
     text: document.body.innerText.slice(0, 3000)

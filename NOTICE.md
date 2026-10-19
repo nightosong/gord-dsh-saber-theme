@@ -6,6 +6,10 @@
 
 视觉参考同一作者的 [Codex Saber Theme](https://github.com/nightosong/codex-saber-theme) 的 Saber Ice Atelier：`#eef7ff` 背景、`#3f85bf` 强调色和半透明面板。本项目的 DSH 适配代码独立实现。
 
+## 任务关注实现
+
+任务摘要投影与定位算法改编自同一作者的 [gord-dsh-worktree](https://github.com/nightosong/gord-dsh-worktree) `0.6.0` 的 `lib/client.js`，原代码使用 MIT License；本项目的 DOM 视图与主题适配独立实现。此代码许可不改变下述美术素材的权利范围。
+
 ## 美术素材
 
 | 本项目文件 | 参考项目来源 |

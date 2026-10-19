@@ -7,6 +7,7 @@ function apply(ctx) {
   const previous = body.getAttribute('data-dsh-saber');
   let disposeTokens;
   let disposeRotation;
+  let disposeTasks;
   let cleaned = false;
   try {
     disposeTokens = ctx.theme.overrideTokens('gord-dsh-saber-theme', SABER_TOKENS);
@@ -14,6 +15,7 @@ function apply(ctx) {
     body.setAttribute('data-dsh-saber', SABER_VERSION);
     const rule = style.sheet.insertRule('body[data-dsh-saber] {}', style.sheet.cssRules.length);
     disposeRotation = startRotation(style.sheet.cssRules[rule].style);
+    disposeTasks = startTasks(ctx);
     ctx.effect(() => cleanup, 'Saber theme presentation');
   } catch (error) {
     cleanup();
@@ -22,6 +24,7 @@ function apply(ctx) {
   function cleanup() {
     if (cleaned) return;
     cleaned = true;
+    disposeTasks?.();
     disposeRotation?.();
     style.remove();
     disposeTokens?.();

@@ -6,7 +6,9 @@ import { build, root } from './build.mjs';
 await build();
 const fixture = await readFile(path.join(root, 'tests/fixture.html'));
 const client = await readFile(path.join(root, 'lib/client.js'));
+const tasks = await readFile(path.join(root, 'tests/task-fixture.js'));
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/task-fixture.js') { res.writeHead(200, { 'Content-Type': 'text/javascript' }).end(tasks); return; }
   if (/^\/client\.wallpaper-\d+\.js$/.test(req.url)) {
     try { res.writeHead(200, { 'Content-Type': 'text/javascript' }).end(await readFile(path.join(root, 'lib', req.url.slice(1)))); }
     catch { res.writeHead(404).end(); }
